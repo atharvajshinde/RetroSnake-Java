@@ -1,8 +1,8 @@
 # RETROSNAKE
-**Production Build:** `0.0.1 Alpha`  
-**Author:** Atharva Shinde  
+**Production Build:** `1.0.0 Release`  
+**Author:** atharvajshinde
 
-Welcome to **RetroSnake**
+Welcome to **RetroSnake!**
 
 ---
 
@@ -21,6 +21,7 @@ Welcome to **RetroSnake**
 ## HOW TO RUN THE GAME
 
 Choose the method that works best for you:
+## ALL FILES CAN BE DOWNLOADED THROUGH THE RELEASES SECTION OF THIS REPO!
 
 ### 1. Windows Installer (Highly Recommended!)
 In this method, you can simply install the setup file, which will automatically setup the entire RetroSnake on your computer!
