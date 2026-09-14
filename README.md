@@ -20,9 +20,9 @@ Welcome to **RetroSnake!**
 
 ## HOW TO RUN THE GAME
 
-Choose the method that works best for you:
 ## ALL FILES CAN BE DOWNLOADED THROUGH THE RELEASES SECTION OF THIS REPO!
 
+Choose the method that works best for you:
 ### 1. Windows Installer (Highly Recommended!)
 In this method, you can simply install the setup file, which will automatically setup the entire RetroSnake on your computer!
 *   If provided with the full folder along with source code and others, navigate to buils\installer\RetroSnakeInstaller.Executable
