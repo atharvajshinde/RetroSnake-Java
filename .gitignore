@@ -1,0 +1,13 @@
+# Compiled class files
+bin/
+*.class
+
+# Build outputs and executables
+libs/
+builds/
+*.jar
+*.exe
+
+# User-specific save data
+snakesavedata.txt
+.retrosnake_data.txt
