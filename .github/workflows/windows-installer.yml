@@ -1,0 +1,38 @@
+name: Build Windows Installer
+
+# This allows you to manually trigger the build from the GitHub website
+on:
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - name: Compile and Package JAR
+      run: |
+        mkdir bin libs
+        javac -d bin src/*.java
+        jar cfe libs/RetroSnake.jar SnakeApp -C bin .
+      shell: bash
+
+    - name: Build Windows Installer (.exe)
+      run: |
+        mkdir -p builds/installer
+        jpackage --type exe --name RetroSnake --input libs --main-jar RetroSnake.jar --main-class SnakeApp --win-shortcut --win-menu --dest builds/installer
+      shell: bash
+
+    - name: Upload Installer for Download
+      uses: actions/upload-artifact@v4
+      with:
+        name: RetroSnake-Windows-Installer
+        path: builds/installer/*.exe
