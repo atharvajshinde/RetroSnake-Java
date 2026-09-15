@@ -19,13 +19,6 @@ public class SnakeGame {
     private Coordinate apple;
     private int appleIdleTicks;
     private int appleMoveCooldown;
-    
-    private Coordinate ghostApple;
-    private int ghostAppleIdleTicks;
-    
-    // NEW: Real-time Ghost Mode variables
-    private long ghostEndTime;
-    private boolean isGhostActive;
 
     private State state;
     private Theme currentTheme;
@@ -58,13 +51,6 @@ public class SnakeGame {
         snake.addLast(new Coordinate(startX - 2, startY));
 
         this.currentDirection = Direction.RIGHT;
-        
-        // Reset ghost properties
-        this.ghostApple = null;
-        this.ghostAppleIdleTicks = 0;
-        this.isGhostActive = false;
-        this.ghostEndTime = 0;
-
         spawnApple();
     }
 
@@ -104,7 +90,7 @@ public class SnakeGame {
     }
 
     private boolean isSpaceOccupied(Coordinate c) {
-        return snake.contains(c) || c.equals(apple) || c.equals(ghostApple);
+        return snake.contains(c) || c.equals(apple);
     }
 
     public void update() {
@@ -112,33 +98,13 @@ public class SnakeGame {
 
         if (!inputQueue.isEmpty()) currentDirection = inputQueue.poll();
 
-        // NEW: Time-based expiration check for Ghost Mode
-        if (isGhostActive) {
-            if (System.currentTimeMillis() >= ghostEndTime) {
-                isGhostActive = false;
-                
-                // CRITICAL: If ghost mode runs out while they are inside their own tail, kill them immediately!
-                if (isSelfCollision(snake.getFirst(), false)) {
-                    triggerGameOver();
-                    return;
-                }
-            }
-        }
-
-        if (ghostApple != null) {
-            ghostAppleIdleTicks++;
-            if (ghostAppleIdleTicks > 60) {
-                ghostApple = null;
-            }
-        }
-
         handlePanickedApple();
 
         Coordinate newHead = calculateNewHead(snake.getFirst());
-        boolean eatingApple = newHead.equals(apple) || newHead.equals(ghostApple);
+        boolean eatingApple = newHead.equals(apple);
 
-        // Updated self-collision check to use the boolean flag
-        if (isWallCollision(newHead) || (isSelfCollision(newHead, eatingApple) && !isGhostActive)) {
+        // Standard collision checks
+        if (isWallCollision(newHead) || isSelfCollision(newHead, eatingApple)) {
             triggerGameOver();
             return;
         }
@@ -148,17 +114,6 @@ public class SnakeGame {
         if (newHead.equals(apple)) {
             increaseScore(1);
             spawnApple();
-            
-            // NEW: Lowered spawn chance to 4% (from 20%)
-            if (state != State.GAME_WON && ghostApple == null && !isGhostActive && random.nextInt(100) < 4) {
-                spawnGhostApple();
-            }
-        }
-        else if (newHead.equals(ghostApple)) {
-            isGhostActive = true;
-            ghostEndTime = System.currentTimeMillis() + 10000; // Exactly 10,000 milliseconds (10 seconds)
-            ghostApple = null;
-            snake.removeLast();
         }
         else {
             snake.removeLast();
@@ -224,15 +179,13 @@ public class SnakeGame {
         return head.getX() < 0 || head.getX() >= width || head.getY() < 0 || head.getY() >= height;
     }
 
-    private boolean isSelfCollision(Coordinate head, boolean eatingApple) {
-        if (eatingApple) {
-            return snake.contains(head);
-        } else {
-            for (int i = 0; i < snake.size() - 1; i++) {
-                if (snake.get(i).equals(head)) return true;
-            }
-            return false;
+    private boolean isSelfCollision(Coordinate headToCheck, boolean eatingApple) {
+        int limit = eatingApple ? snake.size() : snake.size() - 1;
+        for (int i = 0; i < limit; i++) {
+            if (snake.get(i) == headToCheck) continue;
+            if (snake.get(i).equals(headToCheck)) return true;
         }
+        return false;
     }
 
     private void spawnApple() {
@@ -243,14 +196,6 @@ public class SnakeGame {
             this.appleMoveCooldown = 2;
         } else {
             this.state = State.GAME_WON;
-        }
-    }
-
-    private void spawnGhostApple() {
-        List<Coordinate> free = getFreeSpaces();
-        if (!free.isEmpty()) {
-            this.ghostApple = free.get(random.nextInt(free.size()));
-            this.ghostAppleIdleTicks = 0;
         }
     }
 
@@ -276,15 +221,9 @@ public class SnakeGame {
 
             if (Files.exists(path)) {
                 String[] data = Files.readString(path).trim().split(",");
-
-                try {
-                    highScore = Integer.parseInt(data[0]);
-                } catch (Exception e) {}
-
+                try { highScore = Integer.parseInt(data[0]); } catch (Exception e) {}
                 if (data.length > 1) {
-                    try {
-                        currentTheme = Theme.valueOf(data[1]);
-                    } catch (Exception e) {}
+                    try { currentTheme = Theme.valueOf(data[1]); } catch (Exception e) {}
                 }
             }
         }
@@ -301,20 +240,10 @@ public class SnakeGame {
 
     public LinkedList<Coordinate> getSnake() { return snake; }
     public Coordinate getApple() { return apple; }
-    public Coordinate getGhostApple() { return ghostApple; }
     public int getAppleIdleTicks() { return appleIdleTicks; }
     public State getState() { return state; }
     public Theme getTheme() { return currentTheme; }
     public int getScore() { return score; }
     public int getHighScore() { return highScore; }
     public int getLevel() { return (score / 5) + 1; }
-    
-    // NEW GETTERS FOR THE UI:
-    public boolean isGhostActive() { return isGhostActive; }
-    
-    // Returns remaining milliseconds. Returns 0 if not active.
-    public long getGhostTimeRemaining() { 
-        if (!isGhostActive) return 0;
-        return Math.max(0, ghostEndTime - System.currentTimeMillis());
-    }
 }

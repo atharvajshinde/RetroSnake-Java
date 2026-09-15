@@ -48,7 +48,7 @@ public class GamePanel extends JPanel implements ActionListener {
         ActionMap actionMap = getActionMap();
 
         String[] keys = {"UP", "W", "DOWN", "S", "LEFT", "A", "RIGHT", "D"};
-        String[] actions = {"moveUp", "moveUp", "moveDown", "moveDown", "moveLeft", "moveLeft", "moveRight", "moveRight"};
+        String[] actions = {"moveUp", "moveUp", "moveDown", "moveDownOrSettings", "moveLeft", "moveLeft", "moveRight", "moveRight"};
         for (int i = 0; i < keys.length; i++) inputMap.put(KeyStroke.getKeyStroke(keys[i]), actions[i]);
 
         inputMap.put(KeyStroke.getKeyStroke("SPACE"), "start");
@@ -56,9 +56,15 @@ public class GamePanel extends JPanel implements ActionListener {
             public void actionPerformed(ActionEvent e) { if (game.getState() == SnakeGame.State.TITLE) game.startGame(); }
         });
 
-        inputMap.put(KeyStroke.getKeyStroke("S"), "settings");
-        actionMap.put("settings", new AbstractAction() {
-            public void actionPerformed(ActionEvent e) { if (game.getState() == SnakeGame.State.TITLE) game.openSettings(); repaint(); }
+        actionMap.put("moveDownOrSettings", new AbstractAction() {
+            public void actionPerformed(ActionEvent e) {
+                if (game.getState() == SnakeGame.State.TITLE) {
+                    game.openSettings();
+                    repaint();
+                } else {
+                    game.setDirection(Direction.DOWN);
+                }
+            }
         });
 
         inputMap.put(KeyStroke.getKeyStroke("T"), "theme");
@@ -135,35 +141,35 @@ public class GamePanel extends JPanel implements ActionListener {
                 return switch (element) {
                     case "bezel" -> new Color(15, 5, 25);
                     case "console" -> new Color(25, 10, 45);
-                    case "border", "text" -> new Color(0, 255, 255); // Cyan
+                    case "border", "text" -> new Color(0, 255, 255);
                     case "textDim" -> new Color(0, 150, 150);
-                    case "score", "highScore" -> new Color(255, 0, 255); // Pink
-                    case "apple" -> new Color(255, 255, 0); // Yellow
+                    case "score", "highScore" -> new Color(255, 0, 255);
+                    case "apple" -> new Color(255, 255, 0);
                     case "applePanic" -> new Color(255, 120, 0);
                     default -> Color.MAGENTA;
                 };
             case HACKER:
                 return switch (element) {
                     case "bezel" -> new Color(5, 10, 5);
-                    case "console" -> new Color(0, 0, 0); // Pure Black
-                    case "border", "text", "score", "highScore", "apple" -> new Color(50, 255, 50); // Neon Green
+                    case "console" -> new Color(0, 0, 0);
+                    case "border", "text", "score", "highScore", "apple" -> new Color(50, 255, 50);
                     case "textDim", "applePanic" -> new Color(20, 120, 20);
                     default -> Color.MAGENTA;
                 };
             case VIRTUAL_BOY:
                 return switch (element) {
                     case "bezel" -> new Color(15, 0, 0);
-                    case "console" -> new Color(0, 0, 0); // Pure Black
-                    case "border", "text", "score", "highScore", "apple" -> new Color(255, 0, 0); // Intense Red
+                    case "console" -> new Color(0, 0, 0);
+                    case "border", "text", "score", "highScore", "apple" -> new Color(255, 0, 0);
                     case "textDim", "applePanic" -> new Color(120, 0, 0);
                     default -> Color.MAGENTA;
                 };
             case CLASSIC:
             default:
                 return switch (element) {
-                    case "bezel" -> new Color(15, 15, 20); // Dark Slate
-                    case "console" -> new Color(5, 5, 10); // Very Dark Slate
-                    case "border", "text" -> new Color(240, 240, 240); // Off-White
+                    case "bezel" -> new Color(15, 15, 20);
+                    case "console" -> new Color(5, 5, 10);
+                    case "border", "text" -> new Color(240, 240, 240);
                     case "textDim" -> new Color(100, 100, 110);
                     case "score" -> new Color(50, 255, 50);
                     case "highScore" -> new Color(255, 50, 50);
@@ -217,7 +223,6 @@ public class GamePanel extends JPanel implements ActionListener {
         g2d.setStroke(new BasicStroke(1));
 
         drawGrid(g2d, gridWidth, gridHeight);
-        drawGhostApple(g2d);
         drawPanickedApple(g2d);
         drawSnake(g2d);
         drawSideHUD(g2d, gridWidth, 0, hudWidth, gridHeight);
@@ -238,13 +243,11 @@ public class GamePanel extends JPanel implements ActionListener {
         g.setFont(new Font("Monospaced", Font.BOLD, 60));
         String title = "SETTINGS";
         g.drawString(title, (screenWidth - g.getFontMetrics().stringWidth(title)) / 2, 100);
-
         g.setFont(new Font("Monospaced", Font.BOLD, 22));
-        
+
         String themeName = game.getTheme().name().replace("_", " ");
         String themeLabel = "THEME: " + themeName;
         g.drawString(themeLabel, 100, 250);
-
         g.setColor(getColor("textDim"));
         g.setFont(new Font("Monospaced", Font.PLAIN, 16));
         g.drawString("> Press 'T' to switch themes", 100, 280);
@@ -252,7 +255,6 @@ public class GamePanel extends JPanel implements ActionListener {
         g.setColor(getColor("text"));
         g.setFont(new Font("Monospaced", Font.BOLD, 22));
         g.drawString("HIGH SCORE: " + game.getHighScore(), 100, 360);
-
         g.setColor(getColor("textDim"));
         g.setFont(new Font("Monospaced", Font.PLAIN, 16));
         g.drawString("> Press 'X' to reset high score to 0", 100, 390);
@@ -294,18 +296,6 @@ public class GamePanel extends JPanel implements ActionListener {
         g.setFont(new Font("Monospaced", Font.BOLD, 28));
         g.drawString(String.format("%02d", game.getLevel()), textX, startY + 30);
 
-        // NEW: Time-based Phantom display
-        if (game.isGhostActive()) {
-            startY += 80;
-            g.setColor(game.getTheme() == SnakeGame.Theme.CLASSIC ? new Color(0, 255, 255) : getColor("textDim"));
-            g.setFont(new Font("Monospaced", Font.BOLD, 18));
-            g.drawString("PHANTOM", textX, startY);
-            
-            // Convert milliseconds to full seconds, rounding up so it doesn't say "0 SECONDS" too early
-            int secondsLeft = (int) Math.ceil(game.getGhostTimeRemaining() / 1000.0);
-            g.drawString(secondsLeft + " SECS", textX, startY + 30);
-        }
-
         int controlsY = hudHeight - 80;
         g.setColor(getColor("textDim"));
         g.setFont(new Font("Monospaced", Font.BOLD, 14));
@@ -337,57 +327,33 @@ public class GamePanel extends JPanel implements ActionListener {
         }
     }
 
-    private void drawGhostApple(Graphics2D g) {
-        Coordinate gApple = game.getGhostApple();
-        if (gApple == null) return;
-
-        if (game.getTheme() == SnakeGame.Theme.GAMEBOY || game.getTheme() == SnakeGame.Theme.VIRTUAL_BOY || game.getTheme() == SnakeGame.Theme.HACKER) {
-            g.setColor(getColor("textDim"));
-            g.drawRect(gApple.getX() * TILE_SIZE + 4, gApple.getY() * TILE_SIZE + 4, TILE_SIZE - 8, TILE_SIZE - 8);
-            g.drawRect(gApple.getX() * TILE_SIZE + 5, gApple.getY() * TILE_SIZE + 5, TILE_SIZE - 10, TILE_SIZE - 10);
-        } else {
-            g.setColor(new Color(0, 255, 255));
-            g.fillOval(gApple.getX() * TILE_SIZE + 4, gApple.getY() * TILE_SIZE + 4, TILE_SIZE - 8, TILE_SIZE - 8);
-        }
-    }
-
     private void drawSnake(Graphics2D g) {
         LinkedList<Coordinate> snake = game.getSnake();
         if (snake.isEmpty()) return;
-
-        boolean isGhost = game.isGhostActive();
-
-        // NEW: Real-time flicker check (less than 3 seconds left, toggling every 250ms)
-        if (isGhost) {
-            long timeLeft = game.getGhostTimeRemaining();
-            if (timeLeft <= 3000 && (timeLeft % 500 < 250)) {
-                isGhost = false; // Briefly draw normally to create the flicker effect
-            }
-        }
 
         Color headColor, bodyColor;
 
         switch (game.getTheme()) {
             case GAMEBOY:
-                headColor = isGhost ? GB_DARK : GB_DARKEST;
-                bodyColor = isGhost ? GB_LIGHT : GB_DARK;
+                headColor = GB_DARKEST;
+                bodyColor = GB_DARK;
                 break;
             case SYNTHWAVE:
-                headColor = isGhost ? new Color(255, 0, 255, 100) : new Color(255, 0, 255);
-                bodyColor = isGhost ? new Color(200, 0, 200, 80) : new Color(200, 0, 200);
+                headColor = new Color(255, 0, 255);
+                bodyColor = new Color(200, 0, 200);
                 break;
             case HACKER:
-                headColor = isGhost ? new Color(50, 255, 50, 100) : new Color(50, 255, 50);
-                bodyColor = isGhost ? new Color(20, 150, 20, 80) : new Color(20, 150, 20);
+                headColor = new Color(50, 255, 50);
+                bodyColor = new Color(20, 150, 20);
                 break;
             case VIRTUAL_BOY:
-                headColor = isGhost ? new Color(255, 0, 0, 100) : new Color(255, 0, 0);
-                bodyColor = isGhost ? new Color(150, 0, 0, 80) : new Color(150, 0, 0);
+                headColor = new Color(255, 0, 0);
+                bodyColor = new Color(150, 0, 0);
                 break;
             case CLASSIC:
             default:
-                headColor = isGhost ? new Color(0, 255, 255, 180) : new Color(0, 200, 0);
-                bodyColor = isGhost ? new Color(100, 200, 200, 120) : new Color(0, 150, 0);
+                headColor = new Color(0, 200, 0);
+                bodyColor = new Color(0, 150, 0);
                 break;
         }
 
