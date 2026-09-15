@@ -121,7 +121,6 @@ public class GamePanel extends JPanel implements ActionListener {
         repaint();
     }
 
-    // --- UPDATED: Massive Theme Color Engine ---
     private Color getColor(String element) {
         switch (game.getTheme()) {
             case GAMEBOY:
@@ -184,7 +183,6 @@ public class GamePanel extends JPanel implements ActionListener {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
 
-        // Anti-aliasing looks bad on 4-color retro themes, but good on modern ones
         if (game.getTheme() == SnakeGame.Theme.GAMEBOY || game.getTheme() == SnakeGame.Theme.VIRTUAL_BOY || game.getTheme() == SnakeGame.Theme.HACKER) {
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
         } else {
@@ -242,8 +240,7 @@ public class GamePanel extends JPanel implements ActionListener {
         g.drawString(title, (screenWidth - g.getFontMetrics().stringWidth(title)) / 2, 100);
 
         g.setFont(new Font("Monospaced", Font.BOLD, 22));
-
-        // Cleanly formats enums like "VIRTUAL_BOY" to "VIRTUAL BOY"
+        
         String themeName = game.getTheme().name().replace("_", " ");
         String themeLabel = "THEME: " + themeName;
         g.drawString(themeLabel, 100, 250);
@@ -297,12 +294,16 @@ public class GamePanel extends JPanel implements ActionListener {
         g.setFont(new Font("Monospaced", Font.BOLD, 28));
         g.drawString(String.format("%02d", game.getLevel()), textX, startY + 30);
 
-        if (game.getGhostTimer() > 0) {
+        // NEW: Time-based Phantom display
+        if (game.isGhostActive()) {
             startY += 80;
             g.setColor(game.getTheme() == SnakeGame.Theme.CLASSIC ? new Color(0, 255, 255) : getColor("textDim"));
             g.setFont(new Font("Monospaced", Font.BOLD, 18));
             g.drawString("PHANTOM", textX, startY);
-            g.drawString(game.getGhostTimer() + " MOVES", textX, startY + 30);
+            
+            // Convert milliseconds to full seconds, rounding up so it doesn't say "0 SECONDS" too early
+            int secondsLeft = (int) Math.ceil(game.getGhostTimeRemaining() / 1000.0);
+            g.drawString(secondsLeft + " SECS", textX, startY + 30);
         }
 
         int controlsY = hudHeight - 80;
@@ -354,15 +355,18 @@ public class GamePanel extends JPanel implements ActionListener {
         LinkedList<Coordinate> snake = game.getSnake();
         if (snake.isEmpty()) return;
 
-        boolean isGhost = game.getGhostTimer() > 0;
+        boolean isGhost = game.isGhostActive();
 
-        if (isGhost && game.getGhostTimer() <= 10 && animationTick % 2 == 0) {
-            isGhost = false;
+        // NEW: Real-time flicker check (less than 3 seconds left, toggling every 250ms)
+        if (isGhost) {
+            long timeLeft = game.getGhostTimeRemaining();
+            if (timeLeft <= 3000 && (timeLeft % 500 < 250)) {
+                isGhost = false; // Briefly draw normally to create the flicker effect
+            }
         }
 
         Color headColor, bodyColor;
 
-        // --- UPDATED: Snake colors specifically designed for each theme ---
         switch (game.getTheme()) {
             case GAMEBOY:
                 headColor = isGhost ? GB_DARK : GB_DARKEST;
@@ -456,14 +460,12 @@ public class GamePanel extends JPanel implements ActionListener {
         g.setColor(getColor("textDim"));
 
         if (game.getTheme() == SnakeGame.Theme.GAMEBOY || game.getTheme() == SnakeGame.Theme.VIRTUAL_BOY || game.getTheme() == SnakeGame.Theme.HACKER) {
-            // Point grid for the pixelated/harsh retro themes
             for (int x = 1; x < GRID_WIDTH; x++) {
                 for (int y = 1; y < GRID_HEIGHT; y++) {
                     g.fillRect(x * TILE_SIZE - 1, y * TILE_SIZE - 1, 2, 2);
                 }
             }
         } else {
-            // Line grid for Classic and Synthwave
             for (int x = 1; x < GRID_WIDTH; x++) g.drawLine(x * TILE_SIZE, 0, x * TILE_SIZE, boardHeight);
             for (int y = 1; y < GRID_HEIGHT; y++) g.drawLine(0, y * TILE_SIZE, boardWidth, y * TILE_SIZE);
         }

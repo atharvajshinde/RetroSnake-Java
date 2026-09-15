@@ -25,22 +25,22 @@ Welcome to **RetroSnake!**
 Choose the method that works best for you:
 ### 1. Windows Installer (Highly Recommended!)
 In this method, you can simply install the setup file, which will automatically setup the entire RetroSnake on your computer!
-*   If provided with the full folder along with source code and others, navigate to buils\installer\RetroSnakeInstaller.Executable
+*   If provided with the full folder along with source code and others, navigate to builds\installers\RetroSnakeInstaller.Executable
 *   Now, simply follow and run the entire setup wizard to get playing.
 *   You may also be provided with a simple executable, you can also run that to install it!
 
 
-### 1. Native Executable (Recommended)
+### 2. Native Executable (Recommended)
 If you downloaded a native build (`.exe` for Windows or the Linux App-Image), you don't need to install Java or touch the terminal! 
 *   Simply open the `builds/` folder for your OS.
 *   Double-click the **RetroSnake** application to play.
 
-### 2. Run the Executable JAR
+### 3. Run the Executable JAR
 If you have Java installed on your system, you can run the pre-packaged executable archive.
 *   Open your terminal in the project folder.
 *   Run: `java -jar libs/RetroSnake.jar`
 
-### 3. Compile from Source (For Developers)
+### 4. Compile from Source (For Developers)
 1. Open your terminal in the root project folder.
 2. Compile the code: `javac -d bin src/*.java`
 3. Run the game: `java -cp bin SnakeApp`
@@ -102,6 +102,6 @@ You can cycle through 5 distinct visual aesthetics in the Settings menu:
 ### Advanced Mechanics
 *   **The Leveling System:** For every 5 apples you eat, the game levels up, permanently increasing the snake's speed.
 *   **The Panicked Apple:** If an apple sits uneaten for too long, it will begin to pulse. Shortly after, it will actively try to pathfind and run away from your snake's head!
-*   **The Phantom Apple:** A rare, glowing blue/gray apple. Eating this grants you "Ghost Mode" for 45 moves. 
+*   **The Phantom Apple:** A rare, glowing blue/gray apple. Eating this grants you "Ghost Mode" for exactly 10 seconds. 
     *   *Ghost Mode:* Your snake changes color, and you can safely cross through your own tail without dying. 
-    *   *Warning:* When you have 10 moves of invincibility left, your snake will begin to rapidly flicker. Get out of your own body before the timer hits 0!
+    *   *Warning:* When you have 3 seconds of invincibility left, your snake will begin to rapidly flicker. Get out of your own body before the timer hits 0!
