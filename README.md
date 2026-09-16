@@ -1,18 +1,18 @@
 # RETROSNAKE
-**Production Build:** `Beta Branch`  
+**Production Build:** `v1.1 - UI/UX Refresh Update!`  
 **Author:** atharvajshinde
 
-
 Welcome to **RetroSnake!**
-**SPECIAL BETA BRANCH FOR TESTING PURPOSES!**
+**MASSIVE NEW UPDATES TO SNAKE! FULL UI/UX REFRESH, SINGLE THEME, ANIMATIONS, COMBO SYSTEM!**
 
 ---
 
 ## CONTROLS
-*   **W A S D** - Move Snake
-*   **SPACE** - Start Game
+*   **W A S D / Arrow Keys** - Move Snake
+*   **SPACE / ENTER** - Start Game / Select
 *   **S** - Open Settings (from Title)
-*   **T** - Cycle Color Themes (in Settings)
+*   **Z** - Cycle Zoom Scale (in Settings)
+*   **B** - Cycle Board Size / Difficulty (in Settings)
 *   **X** - Reset High Score (in Settings)
 *   **P** - Pause / Resume
 *   **R** - Restart Game (on Game Over)
@@ -31,7 +31,7 @@ Download the `RetroSnake-Windows-Installer.exe` file from the Releases page.
 *   It will automatically set up RetroSnake on your computer and create an easy-to-use shortcut.
 
 ### 2. Native Executable (Recommended for Linux)
-If you downloaded a native build (like the Linux App-Image), you don't need to install Java or touch the terminal! 
+If you downloaded a native build, you don't need to install Java or touch the terminal! 
 *   Simply extract the folder and double-click the **RetroSnake** application to play.
 
 ### 3. Run the Executable JAR
@@ -89,15 +89,9 @@ If you have Java installed on your system, you can run the pre-packaged executab
 ---
 
 ## THE GAME MANUAL
-
-### The Aesthetics (Themes)
-You can cycle through 5 distinct visual aesthetics in the Settings menu:
-1.  **Classic Retro:** The default. Deep slate grays with smooth, anti-aliased rendering.
-2.  **Game Boy:** 4-color olive green palette with pixelated, scaly rendering.
-3.  **Synthwave:** Deep neon purples, hot pinks, and cyan grid lines.
-4.  **Hacker:** Pure terminal black with high-contrast, glowing neon green.
-5.  **Virtual Boy:** Pure black with intense red accents (eye-strain not included).
-
-### Advanced Mechanics
+### Advanced Mechanics & Game Juice
+*   **Dynamic Scaling & Boards:** Use the settings menu to adjust your screen zoom (1.0x to 3.0x) and choose between Small (16x16), Medium (24x24), and Large (32x32) grids. Larger boards increase the snake's base speed!
+*   **The Combo System:** Eating apples in quick succession triggers an escalating combo multiplier (x2, x3, x4) tracked by a draining HUD combo bar.
 *   **The Leveling System:** For every 5 apples you eat, the game levels up, permanently increasing the snake's speed.
-*   **The Panicked Apple:** If an apple sits uneaten for too long, it will begin to pulse. Shortly after, it will actively try to pathfind and run away from your snake's head!
+*   **The Panicked Apple:** If an apple sits uneaten too long, it will begin to throb and flash, eventually trying to pathfind and run away from your snake's head!
+*   **Tactile Feedback:** Experience 60FPS fluid motion featuring screen shake on death, hit-stop micro-pauses on apple bites, rolling pinball score counters, and ghost trails at high combos.
