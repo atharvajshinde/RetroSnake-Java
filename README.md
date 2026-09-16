@@ -1,8 +1,10 @@
 # RETROSNAKE
-**Production Build:** `1.1.0 Release`  
+**Production Build:** `Beta Branch`  
 **Author:** atharvajshinde
 
+
 Welcome to **RetroSnake!**
+**SPECIAL BETA BRANCH FOR TESTING PURPOSES!**
 
 ---
 
