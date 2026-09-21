@@ -1,10 +1,11 @@
 # RETROSNAKE
-**Production Build:** `v1.1 - UI/UX Refresh Update!`  
+**Production Build:** `v1.1 - UI/UX Refresh Update! FINAL RELEASE`  
 **Author:** atharvajshinde
 
 Welcome to **RetroSnake!**
-**MASSIVE NEW UPDATES TO SNAKE! FULL UI/UX REFRESH, SINGLE THEME, ANIMATIONS, COMBO SYSTEM!**
+**MASSIVE NEW UPDATES TO SNAKE! FULL UI/UX REFRESH, SINGLE THEME, ANIMATIONS, COMBO SYSTEM! FADE ANIMATIONS, AND BEST OF ALL, A FULL DASH SYSTEM THAT CAN BE ENABLED/DISABLED IN THE    SETTINGS!**
 
+btw forgot to mention that the previous version of **1.1** was beta lol. srry :p
 ---
 
 ## CONTROLS
