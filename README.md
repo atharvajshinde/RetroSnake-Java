@@ -17,7 +17,6 @@ Welcome to **RetroSnake!**
 *   **Pre-computed Audio Engine**: Audio clips are now pre-synthesized at startup into memory buffers, guaranteeing zero audio lag or thread-creation churn.
 *   **Asynchronous Saves**: High scores are now written to disk via a background daemon thread, preventing disk I/O latency from stalling gameplay.
 *   **Cinematic Boot Sequence**: The game now boots into a 1.5-second cinematic splash screen featuring "atharvajshinde studios".
-*   **Game Mode Toggle**: Seamlessly swap between classic `1-PLAYER` and the new `2-PLAYER` modes right from the settings menu.
 
 ---
 
