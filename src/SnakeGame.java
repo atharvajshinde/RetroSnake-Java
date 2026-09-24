@@ -1,9 +1,13 @@
+import java.awt.Point;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class SnakeGame {
     public enum State {
@@ -38,6 +42,8 @@ public class SnakeGame {
         }
     }
 
+    private int hitstopFrames = 0;
+
     private int width;
     private int height;
     private BoardSize boardSize;
@@ -45,47 +51,70 @@ public class SnakeGame {
     private Difficulty difficulty = Difficulty.NORMAL;
     private boolean musicEnabled = true;
     private boolean dashEnabled = true;
+    private boolean hitstopEnabled = true;
     private int applesEaten;
+    private boolean[][] occupiedGrid;
 
-    private LinkedList<Coordinate> snake;
-    private Direction currentDirection;
-    private final LinkedList<Direction> inputQueue;
+    private final ExecutorService ioExecutor = Executors.newSingleThreadExecutor(r -> {
+        Thread t = new Thread(r, "SaveWorker");
+        t.setDaemon(true);
+        return t;
+    });
+
+    public class PlayerState {
+        public LinkedList<Coordinate> body = new LinkedList<>();
+        public Direction currentDirection = Direction.RIGHT;
+        public LinkedList<Direction> inputQueue = new LinkedList<>();
+        public int score = 0;
+        public int currentCombo = 1;
+        public long lastAppleEatenTime = 0;
+        public int lastPointsScored = 0;
+        public boolean isDead = false;
+    }
+
+    private PlayerState player;
 
     private Coordinate apple;
 
     private State state;
-    private int score;
     private int highScore;
     private final Random random;
 
-    private int currentCombo;
-    private long lastAppleEatenTime;
-    private int lastPointsScored;
     private static final long COMBO_MAX_TIME = 4000;
 
     public SnakeGame() {
         this.random = new Random();
-        this.inputQueue = new LinkedList<>();
+        this.player = new PlayerState();
         loadData();
         this.state = State.STARTUP;
         initBoard();
+        Runtime.getRuntime().addShutdownHook(new Thread(ioExecutor::shutdown));
     }
 
     private void initBoard() {
-        this.snake = new LinkedList<>();
-        this.inputQueue.clear();
-        this.score = 0;
+        player.body.clear();
+        player.inputQueue.clear();
+        player.score = 0;
+        player.currentCombo = 1;
+        player.lastPointsScored = 0;
+        player.isDead = false;
         this.applesEaten = 0;
-        this.currentCombo = 1;
-        this.lastPointsScored = 0;
 
-        int startX = width / 2;
+        // Reset collision grid
+        occupiedGrid = new boolean[width][height];
+
         int startY = height / 2;
-        snake.addFirst(new Coordinate(startX, startY));
-        snake.addLast(new Coordinate(startX - 1, startY));
-        snake.addLast(new Coordinate(startX - 2, startY));
+        int p1X = width / 2;
+        player.body.addFirst(new Coordinate(p1X, startY));
+        player.body.addLast(new Coordinate(p1X - 1, startY));
+        player.body.addLast(new Coordinate(p1X - 2, startY));
+        player.currentDirection = Direction.RIGHT;
 
-        this.currentDirection = Direction.RIGHT;
+        // Mark initial snake segments in grid
+        occupiedGrid[p1X][startY] = true;
+        occupiedGrid[p1X - 1][startY] = true;
+        occupiedGrid[p1X - 2][startY] = true;
+
         spawnApple();
     }
 
@@ -121,6 +150,11 @@ public class SnakeGame {
         saveData();
     }
 
+    public void toggleHitstop() {
+        hitstopEnabled = !hitstopEnabled;
+        saveData();
+    }
+
     public void startGame() {
         if (state == State.TITLE)
             state = State.PLAYING;
@@ -141,7 +175,7 @@ public class SnakeGame {
             state = State.PAUSED;
         else if (state == State.PAUSED) {
             state = State.PLAYING;
-            lastAppleEatenTime = System.currentTimeMillis();
+            player.lastAppleEatenTime = System.currentTimeMillis();
         }
     }
 
@@ -156,9 +190,10 @@ public class SnakeGame {
     }
 
     public void setDirection(Direction newDirection) {
-        if (state != State.PLAYING)
+        if (state != State.PLAYING || player.isDead)
             return;
-        Direction lastCommand = inputQueue.isEmpty() ? currentDirection : inputQueue.getLast();
+        Direction lastCommand = player.inputQueue.isEmpty()
+                ? player.currentDirection : player.inputQueue.getLast();
         if (lastCommand == Direction.UP && newDirection == Direction.DOWN)
             return;
         if (lastCommand == Direction.DOWN && newDirection == Direction.UP)
@@ -167,58 +202,67 @@ public class SnakeGame {
             return;
         if (lastCommand == Direction.RIGHT && newDirection == Direction.LEFT)
             return;
-        if (inputQueue.size() < 2)
-            inputQueue.add(newDirection);
+        if (player.inputQueue.size() < 2)
+            player.inputQueue.add(newDirection);
     }
 
     private boolean isSpaceOccupied(Coordinate c) {
-        return snake.contains(c) || c.equals(apple);
+        return occupiedGrid[c.getX()][c.getY()] || c.equals(apple);
     }
 
     public void update() {
         if (state != State.PLAYING)
             return;
 
-        if (System.currentTimeMillis() - lastAppleEatenTime > COMBO_MAX_TIME) {
-            currentCombo = 1;
+        if (hitstopFrames > 0) {
+            hitstopFrames--;
+            return;
         }
 
-        if (!inputQueue.isEmpty())
-            currentDirection = inputQueue.poll();
+        long now = System.currentTimeMillis();
+        if (now - player.lastAppleEatenTime > COMBO_MAX_TIME)
+            player.currentCombo = 1;
+        if (!player.inputQueue.isEmpty())
+            player.currentDirection = player.inputQueue.poll();
 
-        Coordinate newHead = calculateNewHead(snake.getFirst());
-        boolean eatingApple = newHead.equals(apple);
-
-        if (isWallCollision(newHead) || isSelfCollision(newHead, eatingApple)) {
+        Coordinate head = calculateNewHead(player);
+        boolean eating = head.equals(apple);
+        boolean dead = isWallCollision(head) || isSelfCollision(head, eating);
+        if (dead) {
+            player.isDead = true;
             triggerGameOver();
             return;
         }
 
-        snake.addFirst(newHead);
+        // Maintain collision grid: mark new head
+        occupiedGrid[head.getX()][head.getY()] = true;
 
-        if (eatingApple) {
-            applesEaten++;
+        player.body.addFirst(head);
+        if (eating) {
             increaseScore();
+            applesEaten++;
             spawnApple();
         } else {
-            snake.removeLast();
+            // Clear vacated tail from grid
+            Coordinate tail = player.body.removeLast();
+            occupiedGrid[tail.getX()][tail.getY()] = false;
         }
     }
 
     private void increaseScore() {
-        lastPointsScored = currentCombo;
-        score += currentCombo;
-        if (score > highScore) {
-            highScore = score;
-            saveData();
+        player.lastPointsScored = player.currentCombo;
+        player.score += player.currentCombo;
+        if (player.score > highScore) {
+            highScore = player.score;
+            ioExecutor.submit(this::saveDataSync);
         }
-        currentCombo++;
-        lastAppleEatenTime = System.currentTimeMillis();
+        player.currentCombo++;
+        player.lastAppleEatenTime = System.currentTimeMillis();
     }
 
-    private Coordinate calculateNewHead(Coordinate head) {
-        int nextX = head.getX(), nextY = head.getY();
-        switch (currentDirection) {
+    private Coordinate calculateNewHead(PlayerState p) {
+        int nextX = p.body.getFirst().getX(), nextY = p.body.getFirst().getY();
+        switch (p.currentDirection) {
             case UP -> nextY--;
             case DOWN -> nextY++;
             case LEFT -> nextX--;
@@ -231,15 +275,14 @@ public class SnakeGame {
         return head.getX() < 0 || head.getX() >= width || head.getY() < 0 || head.getY() >= height;
     }
 
-    private boolean isSelfCollision(Coordinate headToCheck, boolean eatingApple) {
-        int limit = eatingApple ? snake.size() : snake.size() - 1;
-        for (int i = 0; i < limit; i++) {
-            if (snake.get(i) == headToCheck)
-                continue;
-            if (snake.get(i).equals(headToCheck))
-                return true;
+    private boolean isSelfCollision(Coordinate head, boolean eating) {
+        if (!occupiedGrid[head.getX()][head.getY()]) return false;
+        // Grid says occupied. If not eating, the tail will vacate — allow head to take its place.
+        if (!eating) {
+            Coordinate tail = player.body.getLast();
+            return !head.equals(tail);
         }
-        return false;
+        return true;
     }
 
     private void spawnApple() {
@@ -274,6 +317,7 @@ public class SnakeGame {
         difficulty = Difficulty.NORMAL;
         musicEnabled = true;
         dashEnabled = true;
+        hitstopEnabled = true;
         try {
             Path path = Path.of(System.getProperty("user.home"), ".retrosnake_data.txt");
             if (Files.exists(path)) {
@@ -290,6 +334,8 @@ public class SnakeGame {
                     musicEnabled = Boolean.parseBoolean(data[4]);
                 if (data.length >= 6)
                     dashEnabled = Boolean.parseBoolean(data[5]);
+                if (data.length >= 7)
+                    hitstopEnabled = Boolean.parseBoolean(data[6]);
             }
         } catch (Exception e) {
         }
@@ -298,16 +344,21 @@ public class SnakeGame {
     }
 
     private void saveData() {
+        saveDataSync();
+    }
+
+    private void saveDataSync() {
         try {
             Path path = Path.of(System.getProperty("user.home"), ".retrosnake_data.txt");
             Files.writeString(path,
-                    highScore + "," + boardSize.name() + "," + scale + "," + difficulty.name() + "," + musicEnabled + "," + dashEnabled);
+                    highScore + "," + boardSize.name() + "," + scale + "," + difficulty.name()
+                            + "," + musicEnabled + "," + dashEnabled + "," + hitstopEnabled);
         } catch (Exception e) {
         }
     }
 
     public LinkedList<Coordinate> getSnake() {
-        return snake;
+        return player.body;
     }
 
     public Coordinate getApple() {
@@ -323,7 +374,7 @@ public class SnakeGame {
     }
 
     public int getScore() {
-        return score;
+        return player.score;
     }
 
     public int getHighScore() {
@@ -331,7 +382,7 @@ public class SnakeGame {
     }
 
     public int getLevel() {
-        return (applesEaten / 5) + 1;
+        return (player.score / 5) + 1;
     }
 
     public BoardSize getBoardSize() {
@@ -354,6 +405,14 @@ public class SnakeGame {
         return dashEnabled;
     }
 
+    public boolean isHitstopEnabled() {
+        return hitstopEnabled;
+    }
+
+    public void setHitstopFrames(int frames) {
+        this.hitstopFrames = frames;
+    }
+
     public int getWidth() {
         return width;
     }
@@ -363,17 +422,41 @@ public class SnakeGame {
     }
 
     public int getCombo() {
-        return currentCombo;
+        return player.currentCombo;
     }
 
     public int getLastPointsScored() {
-        return lastPointsScored;
+        return player.lastPointsScored;
     }
 
     public double getComboTimerRatio() {
-        if (currentCombo <= 1)
+        long elapsed = System.currentTimeMillis() - player.lastAppleEatenTime;
+        if (elapsed > COMBO_MAX_TIME)
             return 0.0;
-        double elapsed = System.currentTimeMillis() - lastAppleEatenTime;
-        return Math.max(0.0, 1.0 - (elapsed / (double) COMBO_MAX_TIME));
+        return 1.0 - ((double) elapsed / COMBO_MAX_TIME);
+    }
+
+    public static record RenderSnapshot(
+        int score, int highScore, int combo, int stamina,
+        Point headPosition,
+        List<Point> bodyPositions,
+        Point applePosition,
+        State gameState
+    ) {}
+
+    public synchronized RenderSnapshot createSnapshot() {
+        Point headPos = null;
+        List<Point> bodyPos = new ArrayList<>();
+        if (!player.body.isEmpty()) {
+            headPos = new Point(player.body.getFirst().getX(), player.body.getFirst().getY());
+            for (Coordinate c : player.body) {
+                bodyPos.add(new Point(c.getX(), c.getY()));
+            }
+        }
+        Point applePos = apple != null ? new Point(apple.getX(), apple.getY()) : null;
+        return new RenderSnapshot(
+            player.score, highScore, player.currentCombo, 0,
+            headPos, Collections.unmodifiableList(bodyPos), applePos, state
+        );
     }
 }
