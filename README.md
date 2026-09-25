@@ -2,9 +2,9 @@
 
 <img src="assets/SNAKELOGO.png" alt="Snake Logo" width="240">
 
-# SNAKE
 
-<img src="assets/RELEASELOGO.png" alt="1.0 - Stable Release">
+
+<img src="assets/RELEASELOGO.png" alt="1.0 - Release" width="120">
 
 ---
 
