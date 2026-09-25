@@ -1,14 +1,13 @@
 <div align="center">
 
-<img src="assets/SNAKELOGO.png" alt="Snake Logo" width="240">
-<br>
-<img src="assets/RELEASELOGO.png" alt="1.0 - Release" width="200">
+<img src="assets/SNAKELOGO.png" alt="Snake Logo" width="320">
+<br><br>
+<img src="assets/RELEASELOGO.png" alt="1.0 - Release" width="130">
 
 ---
 
 [![Java 21+](https://img.shields.io/badge/Java-21+-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](#)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey?style=for-the-badge)](#)
-[![Release](https://img.shields.io/badge/Release-1.0-blueviolet?style=for-the-badge)](#)
 
 *A ground-up rebuild of the arcade classic, engineered for a deterministic 60 TPS core, zero-allocation rendering, and the same but a different feel of playing Snake for the first time.*
 *Been a long time in beta, even though I kind of did not mention it like in any update lol.*
