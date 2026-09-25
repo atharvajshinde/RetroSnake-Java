@@ -1,10 +1,10 @@
 <div align="center">
 
-<img src="assets/SNAKELOGO.png" alt="RetroSnake Logo" width="240">
+<img src="assets/SNAKELOGO.png" alt="Snake Logo" width="240">
 
-# RETROSNAKE
+# SNAKE
 
-**1.0 - Stable Release**
+<img src="assets/RELEASELOGO.png" alt="1.0 - Stable Release">
 
 ---
 
@@ -15,7 +15,7 @@
 *A ground-up rebuild of the arcade classic, engineered for a deterministic 60 TPS core, zero-allocation rendering, and the same but a different feel of playing Snake for the first time.*
 *Been a long time in beta, even though I kind of did not mention it like in any update lol.*
 
-<img src="assets/gameplay.gif" alt="RetroSnake Gameplay Preview" width="700">
+<img src="assets/gameplay.gif" alt="Snake Gameplay Preview" width="700">
 
 [Engine](#engine-architecture--performance) &nbsp;|&nbsp; [Controls](#controls) &nbsp;|&nbsp; [Installation](#how-to-run-the-game) &nbsp;|&nbsp; [Game Manual](#the-game-manual)
 
@@ -25,7 +25,7 @@
 
 ## Engine Architecture & Performance
 
-RetroSnake's interface has been rebuilt into a thick hardware-style frame with a top **Header**, right-hand **Sidebar**, and bottom **Footer**, built to mimic the feel of a genuine retro arcade cabinet. Underneath, the engine has been overhauled from the ground up for maximum performance (it can probably run smoothly on a potato!):
+Snake's interface has been rebuilt into a thick hardware-style frame with a top **Header**, right-hand **Sidebar**, and bottom **Footer**, built to mimic the feel of a genuine retro arcade cabinet. Underneath, the engine has been overhauled from the ground up for maximum performance (it can probably run smoothly on a potato!):
 
 | Feature | Description |
 | :--- | :--- |
@@ -58,9 +58,9 @@ All builds are available from the **Releases** section of this repository. Pick 
 
 | Method | Instructions |
 | :--- | :--- |
-| **Windows Installer** *(recommended)* | Download `RetroSnake-Windows-Installer.exe` from Releases and run it. Setup is automatic and a shortcut is created for you. |
-| **Native Executable** *(Linux / macOS)* | Extract the downloaded folder and double-click the **RetroSnake** application. No Java installation needed. |
-| **Executable JAR** | With Java installed, open a terminal in the project folder and run `java -jar libs/RetroSnake.jar`. |
+| **Windows Installer** *(recommended)* | Download `Snake-Windows-Installer.exe` from Releases and run it. Setup is automatic and a shortcut is created for you. |
+| **Native Executable** *(Linux / macOS)* | Extract the downloaded folder and double-click the **Snake** application. No Java installation needed. |
+| **Executable JAR** | With Java installed, open a terminal in the project folder and run `java -jar libs/Snake.jar`. |
 | **Compile from Source** | From the project root, run `javac -d bin src/*.java`, then launch with `java -cp bin SnakeApp`. |
 
 <hr>

@@ -6,7 +6,7 @@ BLUE='\033[0;34m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}=== RetroSnake Build System ===${NC}"
+echo -e "${BLUE}=== Snake Build System ===${NC}"
 
 # 1. Prepare directories
 echo "Checking directories..."
@@ -22,9 +22,9 @@ if [ $? -ne 0 ]; then
 fi
 
 # 3. Package the JAR file
-echo "Packaging RetroSnake.jar..."
-jar cfe libs/RetroSnake.jar SnakeApp -C bin .
-echo -e "${GREEN}SUCCESS: libs/RetroSnake.jar created.${NC}"
+echo "Packaging Snake.jar..."
+jar cfe libs/Snake.jar SnakeApp -C bin .
+echo -e "${GREEN}SUCCESS: libs/Snake.jar created.${NC}"
 
 # 4. Optional Native Builds
 if [ "$1" == "--native" ]; then
@@ -35,7 +35,7 @@ if [ "$1" == "--native" ]; then
 
     # Build Linux App-Image
     echo "Building Linux native app..."
-    jpackage --type app-image --name RetroSnake --input libs --main-jar RetroSnake.jar --main-class SnakeApp --dest builds/linux
+    jpackage --type app-image --name Snake --input libs --main-jar Snake.jar --main-class SnakeApp --dest builds/linux
     echo -e "${GREEN}Linux build complete.${NC}"
 
     # Build Windows Executable via Wine
@@ -50,18 +50,18 @@ if [ "$1" == "--native" ]; then
     echo "Building Windows native app via Wine C: drive workaround..."
     
     # Create a temporary workspace inside Wine's C: drive
-    WINE_TEMP="$HOME/.wine/drive_c/RetroSnakeTemp"
+    WINE_TEMP="$HOME/.wine/drive_c/SnakeTemp"
     rm -rf "$WINE_TEMP"
     mkdir -p "$WINE_TEMP/libs"
     
     # Copy the JAR into the virtual C: drive
-    cp libs/RetroSnake.jar "$WINE_TEMP/libs/"
+    cp libs/Snake.jar "$WINE_TEMP/libs/"
     
     # Run jpackage strictly inside the C: drive to bypass the Z: drive bug
-    wine jdk-21.0.2/bin/jpackage.exe --type app-image --name RetroSnake --input 'C:\RetroSnakeTemp\libs' --main-jar RetroSnake.jar --main-class SnakeApp --dest 'C:\RetroSnakeTemp\out'
+    wine jdk-21.0.2/bin/jpackage.exe --type app-image --name Snake --input 'C:\SnakeTemp\libs' --main-jar Snake.jar --main-class SnakeApp --dest 'C:\SnakeTemp\out'
     
     # Move the built Windows folder back to our local project
-    mv "$WINE_TEMP/out/RetroSnake" builds/windows/
+    mv "$WINE_TEMP/out/Snake" builds/windows/
     
     # Clean up the virtual C: drive
     rm -rf "$WINE_TEMP"
