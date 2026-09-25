@@ -2,7 +2,7 @@
 
 <img src="assets/SNAKELOGO.png" alt="Snake Logo" width="240">
 <br>
-<img src="assets/RELEASELOGO.png" alt="1.0 - Release" width="120">
+<img src="assets/RELEASELOGO.png" alt="1.0 - Release" width="200">
 
 ---
 
