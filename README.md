@@ -2,8 +2,6 @@
 
 <img src="assets/SNAKELOGO.png" alt="Snake Logo" width="240">
 
-# SNAKE
-
 **1.0 - Release**
 
 ---
