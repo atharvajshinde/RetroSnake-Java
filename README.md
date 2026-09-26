@@ -1,8 +1,10 @@
 <div align="center">
 
-<img src="assets/SNAKELOGO.png" alt="Snake Logo" width="320">
-<br><br>
-<img src="assets/RELEASELOGO.png" alt="1.0 - Release" width="280">
+<img src="assets/SNAKELOGO.png" alt="Snake Logo" width="240">
+
+# SNAKE
+
+**1.0 - Release**
 
 ---
 

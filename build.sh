@@ -22,6 +22,8 @@ if [ $? -ne 0 ]; then
 fi
 
 # 3. Package the JAR file
+echo "Copying assets..."
+cp -r assets bin/
 echo "Packaging Snake.jar..."
 jar cfe libs/Snake.jar SnakeApp -C bin .
 echo -e "${GREEN}SUCCESS: libs/Snake.jar created.${NC}"
