@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Snake</title>
+    <!-- Load the CheerpJ 3.0 runtime -->
+    <script src="https://cj3.leaningtech.com/3.0/cj3loader.js"></script>
+    <style>
+      /* Matches the GB_LIGHTEST background from your GamePanel */
+      body { margin: 0; background-color: #9bbc0f; overflow: hidden; height: 100vh; }
+    </style>
+  </head>
+  <body>
+    <script>
+      async function runGame() {
+        // Initialize the WebAssembly JVM
+        await cheerpjInit();
+        
+        // Create a display that fills the entire browser window
+        cheerpjCreateDisplay(-1, -1, document.body);
+        
+        // Run your unmodified JAR file 
+        // Ensure this path points to where Snake.jar is located on your server
+        await cheerpjRunJar("/libs/Snake.jar");
+      }
+      
+      runGame();
+    </script>
+  </body>
+</html>
