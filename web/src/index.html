@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RetroSnake</title>
+    <script src="https://cjrtnc.leaningtech.com/3.0/cj3loader.js"></script>
+    <style>
+        body {
+            margin: 0;
+            background-color: #081820;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            font-family: monospace;
+            color: #88c070;
+        }
+        #game-frame {
+            border: 4px solid #346856;
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.9);
+            background: #081820;
+        }
+        .controls {
+            margin-top: 14px;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-frame"></div>
+    <div class="controls">ARROWS / WASD: Steer &bull; F3: Telemetry Overlay</div>
+
+    <script>
+        async function init() {
+            await cheerpjInit();
+            // Match the exact pixel dimensions of your JFrame (e.g. 800x600)
+            cheerpjCreateDisplay(800, 600, document.getElementById("game-frame"));
+            await cheerpjRunJar("/app/RetroSnake.jar");
+        }
+        init();
+    </script>
+</body>
+</html>
